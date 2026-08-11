@@ -49,7 +49,7 @@ async def extract_cards(page):
         if orig <= 0 or sale <= 0 or sale > orig:
             continue
         url = await card.evaluate(
-            'el => { const a = el.closest("a"); return a ? a.href : null; }'
+            'el => { const a = el.querySelector("a"); return a ? a.href : null; }'
         )
         items.append({"name": title.strip(), "sale_price": sale, "orig_price": orig, "url": url})
     return items
