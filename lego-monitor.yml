@@ -1,0 +1,35 @@
+name: LEGO 商品價格追蹤
+
+on:
+  schedule:
+    # 台灣時間每天 19:30 ~ 隔天 01:30，每 20 分鐘一次（共 19 次/天）。
+    # GitHub cron 只認 UTC，19:30~01:30(TW) 換算成 UTC 剛好落在同一天的 11:30~17:30，
+    # 所以拆成三條規則涵蓋 :10 / :30 / :50 三種分鐘：
+    - cron: "30 11-17 * * *"   # 對應 TW 19:30, 20:30, 21:30, 22:30, 23:30, 00:30, 01:30
+    - cron: "50 11-16 * * *"   # 對應 TW 19:50, 20:50, 21:50, 22:50, 23:50, 00:50
+    - cron: "10 12-17 * * *"   # 對應 TW 20:10, 21:10, 22:10, 23:10, 00:10, 01:10
+  workflow_dispatch: {}       # 可在 GitHub Actions 頁面手動點「Run workflow」測試
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    env:
+      GAS_WEBHOOK_URL: ${{ secrets.GAS_WEBHOOK_URL }}
+      GAS_WEBHOOK_SECRET: ${{ secrets.GAS_WEBHOOK_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安裝套件
+        run: |
+          pip install playwright requests
+          playwright install --with-deps chromium
+
+      - name: momo 折扣商品監控（68折以下）
+        run: python momo_monitor.py
+
+      - name: bidbuy4u 全部商品快照
+        run: python bidbuy4u_monitor.py
