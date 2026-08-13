@@ -1,0 +1,34 @@
+name: bidbuy4u 全部商品快照
+
+on:
+  schedule:
+    # 台灣時間每週三 20:00 ~ 23:00，每 3 分鐘一次。
+    # GitHub cron 只認 UTC，TW 20:00~23:00 換算成 UTC 是同一天的 12:00~15:00（週三，星期碼 3）。
+    - cron: "*/3 12-14 * * 3"  # 對應 TW 週三 20:00 ~ 22:57，每 3 分鐘
+    - cron: "0 15 * * 3"       # 對應 TW 週三 23:00（收尾這一次）
+  workflow_dispatch: {}       # 可在 GitHub Actions 頁面手動點「Run workflow」測試
+
+concurrency:
+  group: bidbuy4u-monitor
+  cancel-in-progress: false   # 避免同一時間有兩個 run 同時寫入同一份快照，改成排隊執行
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    env:
+      GAS_WEBHOOK_URL: ${{ secrets.GAS_WEBHOOK_URL }}
+      GAS_WEBHOOK_SECRET: ${{ secrets.GAS_WEBHOOK_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安裝套件
+        run: |
+          pip install playwright requests
+          playwright install --with-deps chromium
+
+      - name: bidbuy4u 全部商品快照
+        run: python bidbuy4u_monitor.py
