@@ -1,11 +1,12 @@
 """
-擷取 lcstw.com.tw（LEGO 官方授權經銷商 SUNKIDS）「限時折價」頁面的折扣商品，
-每次執行都會把結果整批 POST 給 Google Apps Script，寫入時採「快照模式」
-（該站的分頁會被整個清空重寫，不是一直往下累加）。
+擷取 lcstw.com.tw（LEGO 官方授權經銷商 SUNKIDS）「所有商品」頁面的全部商品
+（不只折扣品），每次執行都會把結果整批 POST 給 Google Apps Script，寫入時
+採「快照模式」（該站的分頁會被整個清空重寫，不是一直往下累加）。
 
-這個頁面（/categories/sales）本身就只列出「已經在打折」的商品，而且是伺服器端
-直接算好塞進 HTML 裡（不是前端另外打 API 抓資料），所以不需要像 momo 那樣自己
-設門檻篩選，也不需要 Playwright 開瀏覽器渲染，用 requests 直接抓就好，快很多。
+這個頁面（/categories/products）是伺服器端直接算好塞進 HTML 裡（不是前端另外
+打 API 抓資料），所以不需要 Playwright 開瀏覽器渲染，用 requests 直接抓就好。
+目前全站約 1000 多件商品、15 頁左右（每頁 72 件），大部分商品沒有打折，只顯示
+單一價格；正在特價的商品才會同時有「特價／原價／折數」。
 
 用法（本機測試）:
     pip install requests beautifulsoup4
@@ -15,13 +16,14 @@
 import os
 import re
 import sys
+import time
 
 import requests
 from bs4 import BeautifulSoup
 
-BASE_URL = "https://www.lcstw.com.tw/categories/sales"
+BASE_URL = "https://www.lcstw.com.tw/categories/products"
 PAGE_SIZE = 72
-MAX_PAGES = 10  # 安全上限（目前只有 1~2 頁）
+MAX_PAGES = 25  # 安全上限（目前約 15 頁、1000 出頭件商品）
 
 HEADERS = {
     "User-Agent": (
@@ -109,6 +111,8 @@ def scrape():
         all_items.extend(items)
         if len(items) < PAGE_SIZE:
             break
+
+        time.sleep(0.3)  # 對網站客氣一點，翻頁翻很多次時不要打太快
 
     return all_items
 
