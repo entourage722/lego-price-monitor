@@ -1,4 +1,4 @@
-name: bidbuy4u 全部商品快照
+name: 週三折扣監控（bidbuy4u + lcstw）
 
 on:
   schedule:
@@ -27,8 +27,11 @@ jobs:
 
       - name: 安裝套件
         run: |
-          pip install playwright requests
+          pip install playwright requests beautifulsoup4
           playwright install --with-deps chromium
 
       - name: bidbuy4u 全部商品快照
         run: python bidbuy4u_monitor.py
+
+      - name: lcstw 限時折價快照
+        run: python lcstw_monitor.py
