@@ -1,4 +1,4 @@
-name: momo 折扣商品監控
+name: 每日折扣監控（momo + pchome）
 
 on:
   schedule:
@@ -9,6 +9,10 @@ on:
     - cron: "50 11-16 * * *"   # 對應 TW 19:50, 20:50, 21:50, 22:50, 23:50, 00:50
     - cron: "10 12-17 * * *"   # 對應 TW 20:10, 21:10, 22:10, 23:10, 00:10, 01:10
   workflow_dispatch: {}       # 可在 GitHub Actions 頁面手動點「Run workflow」測試
+
+concurrency:
+  group: momo-monitor
+  cancel-in-progress: false   # 避免同一時間有兩個 run 同時寫入同一份快照，改成排隊執行
 
 jobs:
   scrape:
@@ -25,8 +29,11 @@ jobs:
 
       - name: 安裝套件
         run: |
-          pip install playwright requests
+          pip install playwright requests beautifulsoup4
           playwright install --with-deps chromium
 
       - name: momo 折扣商品監控（70折以下）
         run: python momo_monitor.py
+
+      - name: pchome LEGO新品專區快照
+        run: python pchome_monitor.py
