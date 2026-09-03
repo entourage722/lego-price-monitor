@@ -1,4 +1,4 @@
-name: 每日折扣監控（momo + pchome）
+name: 每日折扣監控（momo + pchome + target）
 
 on:
   schedule:
@@ -37,3 +37,6 @@ jobs:
 
       - name: pchome LEGO新品專區快照
         run: python pchome_monitor.py
+
+      - name: target LEGO分類頁快照
+        run: python target_monitor.py
