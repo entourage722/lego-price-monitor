@@ -60,10 +60,10 @@ async def scrape():
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page(locale="zh-TW")
-        await page.goto(CATEGORY_URL, wait_until="networkidle", timeout=60000)
+        await page.goto(CATEGORY_URL, wait_until="domcontentloaded", timeout=30000)
 
         for page_num in range(1, MAX_PAGES + 1):
-            await page.wait_for_selector(f'div[class*="{CARD_CLASS_MARKER}"]', timeout=20000)
+            await page.wait_for_selector(f'div[class*="{CARD_CLASS_MARKER}"]', timeout=30000)
             items = await extract_cards(page)
             print(f"第 {page_num} 頁：擷取到 {len(items)} 件商品", file=sys.stderr)
 

@@ -84,9 +84,9 @@ async def scrape():
 
         for page_num in range(1, MAX_PAGES + 1):
             url = f"{BASE_URL}&page={page_num}"
-            await page.goto(url, wait_until="networkidle", timeout=60000)
+            await page.goto(url, wait_until="domcontentloaded", timeout=30000)
             try:
-                await page.wait_for_selector(".product-item", timeout=10000)
+                await page.wait_for_selector(".product-item", timeout=30000)
             except Exception:
                 break
 

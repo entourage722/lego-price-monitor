@@ -101,11 +101,11 @@ async def scrape():
         offset = 0
         for _ in range(MAX_PAGES):
             url = f"{BASE_URL}?type=products&Nao={offset}"
-            await page.goto(url, wait_until="networkidle", timeout=60000)
+            await page.goto(url, wait_until="domcontentloaded", timeout=30000)
             try:
                 await page.wait_for_selector(
                     '[data-test="@web/ProductCard/ProductCardVariantWrapper"]',
-                    timeout=15000,
+                    timeout=30000,
                 )
             except Exception:
                 break
